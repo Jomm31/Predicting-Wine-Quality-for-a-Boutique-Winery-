@@ -2,12 +2,11 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load model
+# Load the trained Random Forest model
 model = joblib.load("random_forest_model.joblib")
 
 st.title("🍷 Wine Quality Classifier")
-
-st.write("Enter the wine sample characteristics below:")
+st.write("Enter the wine sample characteristics below to classify its quality:")
 
 # Input fields
 fixed_acidity = st.number_input("Fixed Acidity", min_value=0.0, step=0.1)
@@ -22,27 +21,31 @@ pH = st.number_input("pH", min_value=0.0, step=0.01)
 sulphates = st.number_input("Sulphates", min_value=0.0, step=0.01)
 alcohol = st.number_input("Alcohol", min_value=0.0, step=0.1)
 
-if st.button("Predict Quality"):
+# Prediction button
+if st.button("🔮 Predict Quality"):
     input_data = pd.DataFrame([{
-        'fixed acidity': fixed_acidity,
-        'volatile acidity': volatile_acidity,
-        'citric acid': citric_acid,
-        'residual sugar': residual_sugar,
-        'chlorides': chlorides,
-        'free sulfur dioxide': free_sulfur_dioxide,
-        'total sulfur dioxide': total_sulfur_dioxide,
-        'density': density,
-        'pH': pH,
-        'sulphates': sulphates,
-        'alcohol': alcohol
+        "fixed acidity": fixed_acidity,
+        "volatile acidity": volatile_acidity,
+        "citric acid": citric_acid,
+        "residual sugar": residual_sugar,
+        "chlorides": chlorides,
+        "free sulfur dioxide": free_sulfur_dioxide,
+        "total sulfur dioxide": total_sulfur_dioxide,
+        "density": density,
+        "pH": pH,
+        "sulphates": sulphates,
+        "alcohol": alcohol
     }])
 
+    # Prediction
     prediction = model.predict(input_data)
     prediction_proba = model.predict_proba(input_data)
 
-    predicted_class = "Good Quality" if prediction[0] == 1 else "Not Good Quality"
+    # Map result
+    predicted_class = "Good Quality 🍷" if prediction[0] == 1 else "Not Good Quality ❌"
     confidence_score = prediction_proba[0][prediction[0]]
 
+    # Display result
     st.subheader("Prediction Result")
-    st.write(f"**The wine is predicted to be:** {predicted_class}")
-    st.write(f"**Confidence Score:** {confidence_score:.2f}")
+    st.success(f"Predicted Class: **{predicted_class}**")
+    st.info(f"Confidence Score: **{confidence_score:.2f}**")
