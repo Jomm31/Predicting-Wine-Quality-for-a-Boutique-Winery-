@@ -5,64 +5,86 @@ import joblib
 # Load the trained model
 model = joblib.load("random_forest_multi_class_model.joblib")
 
-# Define the imputation values used during training
-# These should ideally be saved alongside the model or calculated from the training data
-# For this example, we'll use the mean and median calculated previously
-# You would need to replace these with the actual calculated values from your training data
-median_citric_acid = 0.26 # Replace with actual calculated median
-mean_density = 0.996783 # Replace with actual calculated mean
-mean_pH = 3.310454 # Replace with actual calculated mean
+# Imputation values (replace with real ones from training)
+median_citric_acid = 0.26
+mean_density = 0.996783
+mean_pH = 3.310454
 
-st.title("Wine Quality Predictor (Multi-class)")
+# Page title
+st.set_page_config(page_title="🍷 Wine Quality Predictor", layout="centered")
 
-st.write("""
-Enter the chemical attributes of the wine to predict its quality rating (3-8).
+st.title("🍇 Wine Quality Predictor (Multi-class)")
+
+st.markdown("""
+This application predicts the **wine quality rating (3–8)** based on its chemical properties.  
+
+👉 According to the company:  
+- **Good Quality** = rating **7–10**  
+- **Not Good** = rating **below 7**  
 """)
 
-# Create input fields for each feature
-fixed_acidity = st.number_input("Fixed Acidity", min_value=0.0, format="%f")
-volatile_acidity = st.number_input("Volatile Acidity", min_value=0.0, format="%f")
-citric_acid = st.number_input("Citric Acid", min_value=0.0, format="%f")
-residual_sugar = st.number_input("Residual Sugar", min_value=0.0, format="%f")
-chlorides = st.number_input("Chlorides", min_value=0.0, format="%f")
-free_sulfur_dioxide = st.number_input("Free Sulfur Dioxide", min_value=0.0, format="%f")
-total_sulfur_dioxide = st.number_input("Total Sulfur Dioxide", min_value=0.0, format="%f")
-density = st.number_input("Density", min_value=0.0, format="%f")
-pH = st.number_input("pH", min_value=0.0, format="%f")
-sulphates = st.number_input("Sulphates", min_value=0.0, format="%f")
-alcohol = st.number_input("Alcohol", min_value=0.0, format="%f")
+# Input fields (organized into columns for a cleaner UI)
+col1, col2, col3 = st.columns(3)
 
-# Create a button to make predictions
-if st.button("Predict Quality"):
-    # Create a pandas DataFrame from the input values
-    data = {
-        'fixed acidity': [fixed_acidity],
-        'volatile acidity': [volatile_acidity],
-        'citric acid': [citric_acid],
-        'residual sugar': [residual_sugar],
-        'chlorides': [chlorides],
-        'free sulfur dioxide': [free_sulfur_dioxide],
-        'total sulfur dioxide': [total_sulfur_dioxide],
-        'density': [density],
-        'pH': [pH],
-        'sulphates': [sulphates],
-        'alcohol': [alcohol]
-    }
-    input_df = pd.DataFrame(data)
+with col1:
+    fixed_acidity = st.number_input("Fixed Acidity", min_value=0.0, format="%.2f")
+    volatile_acidity = st.number_input("Volatile Acidity", min_value=0.0, format="%.2f")
+    citric_acid = st.number_input("Citric Acid", min_value=0.0, format="%.2f")
+    residual_sugar = st.number_input("Residual Sugar", min_value=0.0, format="%.2f")
 
-    # Handle missing values using the same imputation strategy as training
-    input_df['citric acid'] = input_df['citric acid'].fillna(median_citric_acid)
-    input_df['density'] = input_df['density'].fillna(mean_density)
-    input_df['pH'] = input_df['pH'].fillna(mean_pH)
+with col2:
+    chlorides = st.number_input("Chlorides", min_value=0.0, format="%.3f")
+    free_sulfur_dioxide = st.number_input("Free Sulfur Dioxide", min_value=0.0, format="%.1f")
+    total_sulfur_dioxide = st.number_input("Total Sulfur Dioxide", min_value=0.0, format="%.1f")
+    density = st.number_input("Density", min_value=0.0, format="%.4f")
 
+with col3:
+    pH = st.number_input("pH", min_value=0.0, format="%.2f")
+    sulphates = st.number_input("Sulphates", min_value=0.0, format="%.2f")
+    alcohol = st.number_input("Alcohol", min_value=0.0, format="%.2f")
 
-    # Make predictions
-    prediction = model.predict(input_df)
-    prediction_proba = model.predict_proba(input_df)
+# Prediction button
+if st.button("🔮 Predict Wine Quality"):
+    # Create DataFrame
+    input_df = pd.DataFrame([{
+        "fixed acidity": fixed_acidity,
+        "volatile acidity": volatile_acidity,
+        "citric acid": citric_acid,
+        "residual sugar": residual_sugar,
+        "chlorides": chlorides,
+        "free sulfur dioxide": free_sulfur_dioxide,
+        "total sulfur dioxide": total_sulfur_dioxide,
+        "density": density,
+        "pH": pH,
+        "sulphates": sulphates,
+        "alcohol": alcohol
+    }])
 
-    # Get the predicted class and its probability
-    predicted_class = prediction[0]
-    confidence = prediction_proba[0][predicted_class - 3] # Adjust index for quality ratings 3-8
+    # Handle missing values with training imputations
+    input_df["citric acid"] = input_df["citric acid"].fillna(median_citric_acid)
+    input_df["density"] = input_df["density"].fillna(mean_density)
+    input_df["pH"] = input_df["pH"].fillna(mean_pH)
 
-    st.success(f"Predicted Wine Quality: {predicted_class}")
-    st.info(f"Confidence: {confidence:.2f}")
+    # Predictions
+    prediction = model.predict(input_df)[0]
+    prediction_proba = model.predict_proba(input_df)[0]
+
+    # Confidence score for predicted class
+    confidence = prediction_proba[prediction - 3]  # adjust index since classes start at 3
+
+    # Class interpretation
+    quality_class = "🍷 Good Quality" if prediction >= 7 else "❌ Not Good Quality"
+
+    # Show results
+    st.subheader("Prediction Result")
+    st.success(f"**Predicted Quality Rating:** {prediction}/10")
+    st.info(f"**Classification:** {quality_class}")
+    st.write(f"**Confidence Score:** {confidence:.2f}")
+
+    # Show all class probabilities
+    st.subheader("Class Probabilities")
+    prob_df = pd.DataFrame({
+        "Quality Rating": list(range(3, 9)),
+        "Probability": prediction_proba
+    })
+    st.bar_chart(prob_df.set_index("Quality Rating"))
