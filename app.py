@@ -6,7 +6,13 @@ import joblib
 model = joblib.load("random_forest_model.joblib")
 
 st.title("🍷 Wine Quality Classifier")
-st.write("Enter the wine sample characteristics below to classify its quality:")
+
+st.write("""
+This application predicts whether a wine sample is **Good Quality** or **Not Good Quality**.  
+
+👉 The company defines **“Good Quality” wine** as one with a quality rating of **7 or higher**,  
+and anything below that as **“Not Good.”**
+""")
 
 # Input fields
 fixed_acidity = st.number_input("Fixed Acidity", min_value=0.0, step=0.1)
