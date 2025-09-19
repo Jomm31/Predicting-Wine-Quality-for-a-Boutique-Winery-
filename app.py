@@ -28,6 +28,7 @@ sulphates = st.number_input("Sulphates", min_value=0.0, step=0.01)
 alcohol = st.number_input("Alcohol", min_value=0.0, step=0.1)
 
 # Prediction button
+# Prediction button
 if st.button("🔮 Predict Quality"):
     input_data = pd.DataFrame([{
         "fixed acidity": fixed_acidity,
@@ -43,21 +44,25 @@ if st.button("🔮 Predict Quality"):
         "alcohol": alcohol
     }])
 
-    # Prediction (binary classification)
-    prediction = model.predict(input_data)
-    prediction_proba = model.predict_proba(input_data)
+    # Predict actual rating (1–10)
+    predicted_rating = int(round(model.predict(input_data)[0]))
 
-    predicted_class = "Good Quality 🍷" if prediction[0] == 1 else "Not Good Quality ❌"
-    confidence_score = prediction_proba[0][prediction[0]]
+    # Define good vs not good
+    predicted_class = "Good Quality 🍷" if predicted_rating >= 7 else "Not Good Quality ❌"
 
-    # OPTIONAL: if your model was trained as regression/classification with rating (0–10), replace this with predict()
+    # If model supports probabilities, show confidence
     try:
-        predicted_rating = model.predict(input_data)[0]  
+        prediction_proba = model.predict_proba(input_data)
+        confidence_score = prediction_proba[0].max()
     except:
-        predicted_rating = confidence_score * 10  # fallback: scale confidence score to 0–10
+        confidence_score = None
 
     # Display results
     st.subheader("Prediction Result")
-    st.success(f"Predicted Class: **{predicted_class}**")
-    st.info(f"Confidence Score: **{confidence_score:.2f}**")
-    st.write(f"Predicted Quality Rating (0–10): **{predicted_rating:.1f}/10**")
+    st.success(f"Predicted Quality Rating: **{predicted_rating}/10**")
+    st.info(f"Predicted Class: **{predicted_class}**")
+
+    if confidence_score:
+        st.write(f"Confidence Score: **{confidence_score:.2f}**")
+
+
