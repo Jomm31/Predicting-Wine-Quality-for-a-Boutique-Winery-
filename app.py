@@ -43,15 +43,21 @@ if st.button("🔮 Predict Quality"):
         "alcohol": alcohol
     }])
 
-    # Prediction
+    # Prediction (binary classification)
     prediction = model.predict(input_data)
     prediction_proba = model.predict_proba(input_data)
 
-    # Map result
     predicted_class = "Good Quality 🍷" if prediction[0] == 1 else "Not Good Quality ❌"
     confidence_score = prediction_proba[0][prediction[0]]
 
-    # Display result
+    # OPTIONAL: if your model was trained as regression/classification with rating (0–10), replace this with predict()
+    try:
+        predicted_rating = model.predict(input_data)[0]  
+    except:
+        predicted_rating = confidence_score * 10  # fallback: scale confidence score to 0–10
+
+    # Display results
     st.subheader("Prediction Result")
     st.success(f"Predicted Class: **{predicted_class}**")
     st.info(f"Confidence Score: **{confidence_score:.2f}**")
+    st.write(f"Predicted Quality Rating (0–10): **{predicted_rating:.1f}/10**")
