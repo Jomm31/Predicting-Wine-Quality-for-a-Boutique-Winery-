@@ -2,18 +2,18 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Load the trained model
-model = joblib.load("random_forest_multi_class_model.joblib")
+# Load the balanced trained model
+model = joblib.load("random_forest_multi_class_model_balanced.joblib")
 
-# Imputation values (replace with real ones from training)
+# Imputation values (replace with the real ones from training if available)
 median_citric_acid = 0.26
 mean_density = 0.996783
 mean_pH = 3.310454
 
-# Page title
+# Page config
 st.set_page_config(page_title="🍷 Wine Quality Predictor", layout="centered")
 
-st.title("🍇 Wine Quality Predictor (Multi-class)")
+st.title("🍇 Wine Quality Predictor (Balanced Multi-class)")
 
 st.markdown("""
 This application predicts the **wine quality rating (3–8)** based on its chemical properties.  
@@ -23,7 +23,7 @@ This application predicts the **wine quality rating (3–8)** based on its chemi
 - **Not Good** = rating **below 7**  
 """)
 
-# Input fields (organized into columns for a cleaner UI)
+# Input fields (organized into columns for cleaner UI)
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -81,7 +81,7 @@ if st.button("🔮 Predict Wine Quality"):
     st.info(f"**Classification:** {quality_class}")
     st.write(f"**Confidence Score:** {confidence:.2f}")
 
-    # Show all class probabilities
+    # Show all class probabilities as a bar chart
     st.subheader("Class Probabilities")
     prob_df = pd.DataFrame({
         "Quality Rating": list(range(3, 9)),
