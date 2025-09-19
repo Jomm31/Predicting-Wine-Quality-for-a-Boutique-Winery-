@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Load the balanced trained model
-model = joblib.load("random_forest_balanced.joblib")
+model = joblib.load("random_forest_balanced_compressed")
 
 # Imputation values (replace with the real ones from training if available)
 median_citric_acid = 0.26
@@ -88,4 +88,5 @@ if st.button("🔮 Predict Wine Quality"):
         "Probability": prediction_proba
     })
     st.bar_chart(prob_df.set_index("Quality Rating"))
+
 
